@@ -34,7 +34,7 @@ jobs:
           cd "$MOD_DIR"
           sed -i 's/net\.minecraft\.component\.type\.TooltipDisplay;/net.minecraft.component.type.TooltipDisplayComponent;/g' src/main/java/com/tarotmod/item/TarotCardItem.java
           sed -i 's/\bTooltipDisplay\b/TooltipDisplayComponent/g' src/main/java/com/tarotmod/item/TarotCardItem.java
-          sed -i 's/e\.velocityModified = true;/e.scheduleVelocityUpdate();/g' src/main/java/com/tarotmod/card/CardAbilities.java
+          sed -i 's/e\.velocityModified = true;/e.addVelocity(0, 0, 0);/g' src/main/java/com/tarotmod/card/CardAbilities.java
 
       - name: Configurar Python y ejecutar generadores
         uses: actions/setup-python@v5
