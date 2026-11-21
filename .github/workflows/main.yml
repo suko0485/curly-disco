@@ -17,7 +17,6 @@ jobs:
         run: |
           unzip -o -q *.zip
           
-          # Busca dónde quedó build.gradle (en la raíz o dentro de una subcarpeta)
           BUILD_FILE=$(find . -maxdepth 3 -name "build.gradle" | head -n 1)
           
           if [ -z "$BUILD_FILE" ]; then
@@ -29,6 +28,13 @@ jobs:
           MOD_DIR=$(dirname "$BUILD_FILE")
           echo "MOD_DIR=$MOD_DIR" >> $GITHUB_ENV
           echo "Carpeta del mod detectada en: $MOD_DIR"
+
+      - name: Parchear errores de API 1.21.11
+        run: |
+          cd "$MOD_DIR"
+          sed -i 's/net\.minecraft\.component\.type\.TooltipDisplay;/net.minecraft.component.type.TooltipDisplayComponent;/g' src/main/java/com/tarotmod/item/TarotCardItem.java
+          sed -i 's/\bTooltipDisplay\b/TooltipDisplayComponent/g' src/main/java/com/tarotmod/item/TarotCardItem.java
+          sed -i 's/e\.velocityModified = true;/e.scheduleVelocityUpdate();/g' src/main/java/com/tarotmod/card/CardAbilities.java
 
       - name: Configurar Python y ejecutar generadores
         uses: actions/setup-python@v5
