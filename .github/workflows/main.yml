@@ -1,0 +1,65 @@
+name: Compilar Tarot Mod Fabric 1.21.11
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Descomprimir proyecto completo
+        run: |
+          mkdir -p proyecto
+          unzip -q *.zip -d proyecto
+          # Si adentro viene la carpeta tarot-mod, entra a ella automáticamente
+          if [ -d "proyecto/tarot-mod" ]; then
+            mv proyecto/tarot-mod/* proyecto/
+            rmdir proyecto/tarot-mod
+          fi
+          echo "Verificando carpeta src:"
+          ls -la proyecto/src/main
+
+      - name: Configurar Python y ejecutar generadores
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generar assets y datos del mod
+        working-directory: ./proyecto
+        run: |
+          pip install pillow || true
+          for script in gen_assets.py gen_cards.py gen_bosses.py gen_data.py; do
+            if [ -f "$script" ]; then
+              echo "Ejecutando $script..."
+              python "$script"
+            fi
+          done
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Configurar Gradle 9.2.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.0'
+
+      - name: Compilar mod
+        working-directory: ./proyecto
+        run: gradle build
+
+      - name: Subir el archivo .JAR compilado
+        uses: actions/upload-artifact@v4
+        with:
+          name: tarot-mod-fabric-1.21.11
+          path: |
+            proyecto/build/libs/*.jar
+            !proyecto/build/libs/*-sources.jar
