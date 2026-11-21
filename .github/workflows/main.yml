@@ -38,7 +38,7 @@ jobs:
       - name: Generar assets y datos del mod
         run: |
           cd "$MOD_DIR"
-          pip install pillow || true
+          pip install pillow numpy
           for script in gen_assets.py gen_cards.py gen_bosses.py gen_data.py; do
             if [ -f "$script" ]; then
               echo "Ejecutando $script..."
