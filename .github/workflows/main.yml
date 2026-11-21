@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
+    paths-ignore:
+      - 'compilado/**'
 
 jobs:
   build:
@@ -68,10 +70,12 @@ jobs:
           cd "$MOD_DIR"
           gradle build
 
-      - name: Subir el archivo .JAR compilado
-        uses: actions/upload-artifact@v4
-        with:
-          name: tarot-mod-fabric-1.21.11
-          path: |
-            **/build/libs/*.jar
-            !**/build/libs/*-sources.jar
+      - name: Guardar JAR directo en el repositorio
+        run: |
+          mkdir -p compilado
+          find . -path "*/build/libs/*.jar" ! -name "*-sources.jar" -exec cp {} compilado/ \;
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add compilado/
+          git commit -m "Subir mod compilado [skip ci]" || exit 0
+          git push
