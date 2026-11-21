@@ -13,17 +13,10 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Descomprimir proyecto completo
+      - name: Descomprimir ZIP en la raíz
         run: |
-          mkdir -p proyecto
-          unzip -q *.zip -d proyecto
-          # Si adentro viene la carpeta tarot-mod, entra a ella automáticamente
-          if [ -d "proyecto/tarot-mod" ]; then
-            mv proyecto/tarot-mod/* proyecto/
-            rmdir proyecto/tarot-mod
-          fi
-          echo "Verificando carpeta src:"
-          ls -la proyecto/src/main
+          unzip -o -q *.zip
+          ls -la
 
       - name: Configurar Python y ejecutar generadores
         uses: actions/setup-python@v5
@@ -31,7 +24,6 @@ jobs:
           python-version: '3.11'
 
       - name: Generar assets y datos del mod
-        working-directory: ./proyecto
         run: |
           pip install pillow || true
           for script in gen_assets.py gen_cards.py gen_bosses.py gen_data.py; do
@@ -53,7 +45,6 @@ jobs:
           gradle-version: '9.2.0'
 
       - name: Compilar mod
-        working-directory: ./proyecto
         run: gradle build
 
       - name: Subir el archivo .JAR compilado
@@ -61,5 +52,5 @@ jobs:
         with:
           name: tarot-mod-fabric-1.21.11
           path: |
-            proyecto/build/libs/*.jar
-            !proyecto/build/libs/*-sources.jar
+            build/libs/*.jar
+            !build/libs/*-sources.jar
